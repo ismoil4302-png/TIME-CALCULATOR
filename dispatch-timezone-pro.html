@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispatch Panel — Templates + US Timezone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0F1C;
+    --panel: #121A2B;
+    --panel-2: #17203A;
+    --border: #26314E;
+    --amber: #F4A83D;
+    --amber-dim: #8A6428;
+    --text: #EAEFF7;
+    --muted: #7C8AA8;
+    --green: #4CBB7A;
+    --blue: #4C8DF4;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(244,168,61,0.06), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(76,187,122,0.05), transparent 40%);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(244,168,61,0.02) 1px, transparent 1px);
+    background-size: 26px 26px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: 100vh;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* ===== LEFT: TEMPLATES ===== */
+  .templates-section {
+    flex: 0 0 320px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .templates-header {
+    flex: 0 0 auto;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  .templates-header h2 {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .template-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    padding: 0 8px;
+  }
+
+  .template-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .template-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .template-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .template-card {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 9px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 0 0 auto;
+    margin: 4px 0;
+    transition: all 0.15s ease;
+    cursor: grab;
+    background: var(--panel);
+    user-select: none;
+  }
+
+  .template-card:active {
+    cursor: grabbing;
+    opacity: 0.7;
+  }
+
+  .template-card:hover {
+    background: var(--panel-2);
+    border-color: var(--amber-dim);
+  }
+
+  .template-index {
+    color: var(--amber-dim);
+    font-size: 8px;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .template-index-text {
+    flex: 1;
+  }
+
+  .template-index .del {
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 9px;
+    border: none;
+    background: none;
+    padding: 0 4px;
+    opacity: 0.6;
+    font-family: inherit;
+    flex: 0 0 auto;
+  }
+
+  .template-index .del:hover {
+    color: #ff6b5e;
+    opacity: 1;
+  }
+
+  .template-text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 8px;
+    line-height: 1.25;
+    color: #b8bcc8;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 5px;
+    max-height: 45px;
+    overflow: hidden;
+  }
+
+  .copy-btn {
+    align-self: flex-start;
+    background: transparent;
+    border: 1px solid var(--amber-dim);
+    color: var(--amber);
+    font-family: inherit;
+    font-size: 7px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-weight: 600;
+  }
+
+  .copy-btn:hover, .copy-btn.copied {
+    background: var(--amber);
+    color: #1a1410;
+    border-color: var(--amber);
+  }
+
+  .add-template-section {
+    flex: 0 0 auto;
+    padding: 8px 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .add-template-toggle {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .add-template-toggle:hover {
+    border-color: var(--amber-dim);
+    color: var(--amber);
+  }
+
+  .add-template-form {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .add-template-form.open {
+    display: flex;
+  }
+
+  .add-template-form input,
+  .add-template-form textarea {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 9px;
+    padding: 6px;
+    border-radius: 3px;
+  }
+
+  .add-template-form input:focus,
+  .add-template-form textarea:focus {
+    outline: none;
+    border-color: var(--amber-dim);
+  }
+
+  .add-template-form textarea {
+    resize: vertical;
+    min-height: 50px;
+  }
+
+  .add-template-form button {
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-weight: 600;
+  }
+
+  .add-template-form button:hover {
+    background: var(--green);
+    color: #000;
+  }
+
+  /* ===== RIGHT: TIMEZONE ===== */
+  .timezone-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .tz-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 16px 20px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .tz-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .tz-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .tz-content::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .tz-title-block {
+    margin-bottom: 16px;
+  }
+
+  .tz-title-block .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .tz-title-block h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.01em;
+    color: var(--green);
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .col {
+    background: var(--panel);
+    border: 2px solid var(--zone-color, var(--amber));
+    border-radius: 8px;
+    padding: 14px 12px;
+    box-shadow: inset 0 2px 0 var(--zone-color, var(--amber));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .zone-name {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    margin-bottom: 2px;
+  }
+
+  .zone-offset {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    margin-bottom: 8px;
+  }
+
+  .clock {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .flip-group {
+    display: flex;
+    gap: 0px;
+  }
+
+  .digit {
+    position: relative;
+    display: inline-block;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    width: 20px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .digit::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .digit.flip {
+    animation: flipDigit 0.35s ease;
+  }
+
+  @keyframes flipDigit {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); opacity: 0.4; }
+    100% { transform: rotateX(0deg); }
+  }
+
+  .colon {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--amber-dim);
+  }
+
+  .meridiem {
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .date-row {
+    font-size: 8px;
+    color: var(--muted);
+    margin: 6px 0;
+  }
+
+  .eta-row {
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 100%;
+  }
+
+  .eta-label {
+    font-size: 7px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .eta-input {
+    width: 50px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 9px;
+    text-align: center;
+    padding: 3px 4px;
+    outline: none;
+  }
+
+  .eta-input:focus {
+    border-color: var(--amber);
+  }
+
+  .eta-input::-webkit-outer-spin-button,
+  .eta-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .eta-result {
+    font-size: 9px;
+    font-weight: 700;
+    min-height: 13px;
+  }
+
+  .legend {
+    flex: 0 0 auto;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 14px;
+  }
+
+  .legend-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .legend-col-title {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 2px;
+  }
+
+  .legend-states {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 0 0 auto;
+  }
+
+  .legend-item {
+    font-size: 8px;
+    color: var(--muted);
+    line-height: 1.2;
+    padding: 3px 5px;
+    background: var(--panel-2);
+    border-radius: 2px;
+    border: 1px solid var(--border);
+  }
+
+  .legend-abbr {
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .legend-note {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .legend-note-label {
+    font-size: 7px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .legend-note-input {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 8px;
+    padding: 5px;
+    border-radius: 2px;
+    resize: none;
+    min-height: 40px;
+    outline: none;
+  }
+
+  .legend-note-input:focus {
+    border-color: var(--amber-dim);
+  }
+
+  .legend-note {
+    display: none;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--panel-2);
+    border: 1px solid var(--amber-dim);
+    color: var(--amber);
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 50;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 1100px) {
+    .board {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .legend {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .container {
+      flex-direction: column;
+    }
+    .templates-section {
+      flex: 0 0 40%;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .timezone-section {
+      flex: 1;
+    }
+    .board {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .templates-section {
+      flex: 0 0 35%;
+    }
+    .board {
+      grid-template-columns: 1fr;
+    }
+    .legend {
+      grid-template-columns: 1fr;
+    }
+    .col {
+      padding: 10px 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- LEFT: TEMPLATES SECTION -->
+  <div class="templates-section">
+    <div class="templates-header">
+      <span class="dot"></span>
+      <h2>Templates</h2>
+    </div>
+    <div class="template-list" id="templateList"></div>
+    
+    <div class="add-template-section">
+      <button class="add-template-toggle" id="addToggle">+ Add New Template</button>
+      <div class="add-template-form" id="addForm">
+        <input type="text" id="newTitle" placeholder="Template name (optional)">
+        <textarea id="newBody" placeholder="Template text..."></textarea>
+        <button id="addSubmit">Add Template</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: TIMEZONE SECTION -->
+  <div class="timezone-section">
+    <div class="tz-content">
+      <div class="tz-title-block">
+        <div class="eyebrow">Eastern (ET)</div>
+        <h1 id="hero-time">—</h1>
+      </div>
+
+      <div class="board" id="board"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+  // ===== TEMPLATES DATA =====
+  const defaultTemplates = [
+    {
+      title: "Tracking / Status Check",
+      body: `Load #
+Current location: 
+Please advise - all good with tracking on your end?`
+    },
+    {
+      title: "Delivered (POD)",
+      body: `Load # has been delivered
+Please see attached POD
+Please confirm that we won't get any short pay for this load, as it was picked up and delivered on time. Tracking was on at all times
+No damages to the product as it was secured properly
+Seal was intact`
+    },
+    {
+      title: "Picked Up - QTY Check",
+      body: `Load # has been picked up
+Please double check the QTY# and the weight of the freight
+Here you can see attached documents
+Please confirm
+Are we good to go?`
+    },
+    {
+      title: "Picked Up - BOL/Seal",
+      body: `Load is picked up
+BOL's and seal's photos are attached
+Are we good to go?`
+    },
+    {
+      title: "At Shipper - Tracking Required?",
+      body: `We are at the shipper
+Is tracking required for this load or are email updates fine? Also we can share with our own tracking link`
+    }
+  ];
+
+  let templates = JSON.parse(JSON.stringify(defaultTemplates));
+  const listEl = document.getElementById('templateList');
+  const toastEl = document.getElementById('toast');
+  let draggedElement = null;
+
+  function showToast(msg) {
+    toastEl.textContent = msg || 'Copied!';
+    toastEl.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toastEl.classList.remove('show'), 1400);
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast('Copied!');
+  }
+
+  function renderTemplates() {
+    listEl.innerHTML = '';
+    templates.forEach((tpl, idx) => {
+      const card = document.createElement('div');
+      card.className = 'template-card';
+      card.draggable = true;
+      card.dataset.idx = idx;
+
+      const indexRow = document.createElement('div');
+      indexRow.className = 'template-index';
+      
+      const indexText = document.createElement('span');
+      indexText.className = 'template-index-text';
+      indexText.textContent = (idx + 1).toString().padStart(2, '0') + ' · ' + (tpl.title || 'Template');
+      
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = '✕';
+      del.title = "Delete";
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        templates.splice(idx, 1);
+        renderTemplates();
+      });
+      
+      indexRow.appendChild(indexText);
+      indexRow.appendChild(del);
+
+      const textBox = document.createElement('div');
+      textBox.className = 'template-text';
+      textBox.textContent = tpl.body;
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.textContent = 'Copy';
+      copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        copyText(tpl.body);
+      });
+
+      card.appendChild(indexRow);
+      card.appendChild(textBox);
+      card.appendChild(copyBtn);
+
+      // Drag events
+      card.addEventListener('dragstart', (e) => {
+        draggedElement = card;
+        card.style.opacity = '0.5';
+      });
+
+      card.addEventListener('dragend', (e) => {
+        card.style.opacity = '1';
+        draggedElement = null;
+      });
+
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (draggedElement && draggedElement !== card) {
+          const allCards = Array.from(listEl.querySelectorAll('.template-card'));
+          const draggedIdx = allCards.indexOf(draggedElement);
+          const targetIdx = allCards.indexOf(card);
+          
+          if (draggedIdx < targetIdx) {
+            card.parentNode.insertBefore(draggedElement, card.nextSibling);
+          } else {
+            card.parentNode.insertBefore(draggedElement, card);
+          }
+
+          const newTemplates = [];
+          listEl.querySelectorAll('.template-card').forEach((c, i) => {
+            newTemplates.push(templates[parseInt(c.dataset.idx)]);
+          });
+          templates = newTemplates;
+        }
+      });
+
+      listEl.appendChild(card);
+    });
+  }
+
+  document.getElementById('addToggle').addEventListener('click', () => {
+    const form = document.getElementById('addForm');
+    form.classList.toggle('open');
+    if (form.classList.contains('open')) {
+      document.getElementById('newTitle').focus();
+    }
+  });
+
+  document.getElementById('addSubmit').addEventListener('click', () => {
+    const title = document.getElementById('newTitle').value.trim();
+    const body = document.getElementById('newBody').value.trim();
+    if (!body) {
+      showToast('Template text required');
+      return;
+    }
+    templates.push({ title: title || 'New Template', body });
+    document.getElementById('newTitle').value = '';
+    document.getElementById('newBody').value = '';
+    document.getElementById('addForm').classList.remove('open');
+    renderTemplates();
+    showToast('Template added!');
+  });
+
+  renderTemplates();
+
+  // ===== TIMEZONE LOGIC =====
+  const stateNames = {
+    ME: "Maine", NH: "New Hampshire", VT: "Vermont", MA: "Massachusetts", RI: "Rhode Island",
+    CT: "Connecticut", NY: "New York", NJ: "New Jersey", PA: "Pennsylvania", DE: "Delaware",
+    MD: "Maryland", DC: "Washington D.C.", VA: "Virginia", WV: "West Virginia", NC: "North Carolina",
+    SC: "South Carolina", GA: "Georgia", FL: "Florida", OH: "Ohio", MI: "Michigan",
+    IN: "Indiana", KY: "Kentucky",
+    WI: "Wisconsin", IL: "Illinois", MO: "Missouri", IA: "Iowa", MN: "Minnesota",
+    ND: "North Dakota", SD: "South Dakota", NE: "Nebraska", KS: "Kansas", OK: "Oklahoma",
+    TX: "Texas", AR: "Arkansas", LA: "Louisiana", MS: "Mississippi", AL: "Alabama", TN: "Tennessee",
+    MT: "Montana", WY: "Wyoming", ID: "Idaho", UT: "Utah", CO: "Colorado", NM: "New Mexico", AZ: "Arizona",
+    WA: "Washington", OR: "Oregon", CA: "California", NV: "Nevada"
+  };
+
+  const zoneColors = {
+    "Pacific (PT)": "#4C8DF4",
+    "Mountain (MT)": "#E85C5C",
+    "Central (CT)": "#F4C542",
+    "Eastern (ET)": "#4CBB7A"
+  };
+
+  const zones = [
+    { name: "Pacific (PT)",  tz: "America/Los_Angeles", states: "WA, OR, CA, NV" },
+    { name: "Mountain (MT)", tz: "America/Denver",      states: "MT, WY, ID, UT, CO, NM, AZ" },
+    { name: "Central (CT)",  tz: "America/Chicago",     states: "ND, SD, NE, KS, OK, TX, MN, IA, WI, IL, MO, AR, LA, MS, AL, TN" },
+    { name: "Eastern (ET)",  tz: "America/New_York",    states: "ME, NH, VT, MA, RI, CT, NY, NJ, PA, DE, MD, DC, VA, WV, NC, SC, GA, FL, OH, MI, IN, KY" }
+  ];
+
+  const board = document.getElementById('board');
+  const prevValues = {};
+  const zoneNotes = {};
+
+  zones.forEach((z, i) => {
+    const color = zoneColors[z.name] || 'var(--amber)';
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.style.setProperty('--zone-color', color);
+    col.innerHTML = `
+      <div class="zone-name" style="color:${color}">${z.name}</div>
+      <div class="zone-offset" id="offset-${i}" style="color:${color}">—</div>
+      <div class="clock">
+        <div class="flip-group" id="hh-${i}"></div>
+        <div class="colon">:</div>
+        <div class="flip-group" id="mm-${i}"></div>
+        <div class="colon">:</div>
+        <div class="flip-group" id="ss-${i}"></div>
+        <span class="meridiem" id="ampm-${i}" style="color:${color}"></span>
+      </div>
+      <div class="date-row" id="date-${i}"></div>
+      <div class="eta-row">
+        <label class="eta-label" for="eta-input-${i}">+min ETA</label>
+        <input type="number" class="eta-input" id="eta-input-${i}" min="0" placeholder="0" inputmode="numeric">
+        <div class="eta-result" id="eta-result-${i}" style="color:${color}">—</div>
+      </div>
+    `;
+    board.appendChild(col);
+    prevValues[i] = { hh: '', mm: '', ss: '' };
+
+    col.querySelector(`#eta-input-${i}`).addEventListener('input', () => {
+      updateETA(i, z, new Date());
+    });
+  });
+
+  function renderDigits(container, str, prevStr) {
+    container.innerHTML = '';
+    for (let idx = 0; idx < str.length; idx++) {
+      const span = document.createElement('span');
+      span.className = 'digit';
+      span.textContent = str[idx];
+      if (prevStr && prevStr[idx] !== str[idx]) {
+        span.classList.add('flip');
+      }
+      container.appendChild(span);
+    }
+  }
+
+  function getOffsetLabel(tz) {
+    try {
+      const fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'shortOffset' });
+      const parts = fmt.formatToParts(new Date());
+      const off = parts.find(p => p.type === 'timeZoneName');
+      return off ? off.value.replace('GMT', 'GMT') : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function tick() {
+    const now = new Date();
+
+    const heroFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
+    document.getElementById('hero-time').textContent = heroFmt.format(now);
+
+    zones.forEach((z, i) => {
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: z.tz,
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      });
+      const parts = fmt.formatToParts(now);
+      const get = (type) => parts.find(p => p.type === type)?.value || '';
+
+      let hh = get('hour');
+      if (hh.length < 2) hh = '0' + hh;
+      const mm = get('minute');
+      const ss = get('second');
+      const ampm = get('dayPeriod');
+
+      const prev = prevValues[i];
+      renderDigits(document.getElementById(`hh-${i}`), hh, prev.hh);
+      renderDigits(document.getElementById(`mm-${i}`), mm, prev.mm);
+      renderDigits(document.getElementById(`ss-${i}`), ss, prev.ss);
+      document.getElementById(`ampm-${i}`).textContent = ampm;
+
+      prevValues[i] = { hh, mm, ss };
+
+      document.getElementById(`offset-${i}`).textContent = getOffsetLabel(z.tz);
+
+      const dateFmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: z.tz, weekday: 'short', month: 'short', day: 'numeric'
+      });
+      document.getElementById(`date-${i}`).textContent = dateFmt.format(now);
+
+      updateETA(i, z, now);
+    });
+  }
+
+  function updateETA(i, z, now) {
+    const input = document.getElementById(`eta-input-${i}`);
+    const result = document.getElementById(`eta-result-${i}`);
+    const miles = parseFloat(input.value);
+    if (!miles || miles <= 0) {
+      result.textContent = '—';
+      return;
+    }
+    const AVG_SPEED_MPH = 70;
+    const hours = miles / AVG_SPEED_MPH;
+    const etaDate = new Date(now.getTime() + hours * 3600000);
+
+    const zoneNowFmt = new Intl.DateTimeFormat('en-CA', { timeZone: z.tz });
+    const zoneEtaFmt = new Intl.DateTimeFormat('en-CA', { timeZone: z.tz });
+    const nowDay = zoneNowFmt.format(now);
+    const etaDay = zoneEtaFmt.format(etaDate);
+
+    const timeFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: z.tz, hour: '2-digit', minute: '2-digit', hour12: true
+    });
+
+    if (etaDay === nowDay) {
+      result.textContent = `ETA: ${timeFmt.format(etaDate)}`;
+    } else {
+      const dateFmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: z.tz, weekday: 'short', month: 'short', day: 'numeric'
+      });
+      result.textContent = `ETA: ${dateFmt.format(etaDate)} · ${timeFmt.format(etaDate)}`;
+    }
+  }
+
+  function buildLegend() {
+    const legend = document.getElementById('legend');
+    legend.innerHTML = zones.map((z, zidx) => {
+      const color = zoneColors[z.name] || 'var(--amber)';
+      const stateList = z.states.split(', ');
+      
+      const statesHtml = stateList.map(abbr =>
+        `<span class="legend-item"><span class="legend-abbr" style="color:${color}">${abbr}</span> — ${stateNames[abbr] || abbr}</span>`
+      ).join('');
+
+      return `<div class="legend-col">
+        <div class="legend-col-title" style="color:${color}">${z.name}</div>
+        <div class="legend-states">
+          ${statesHtml}
+        </div>
+        <div class="legend-note">
+          <label class="legend-note-label">Note</label>
+          <textarea class="legend-note-input" id="note-${zidx}" placeholder="Add notes for ${z.name}..."></textarea>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Restore notes
+    zones.forEach((z, i) => {
+      const noteEl = document.getElementById(`note-${i}`);
+      if (noteEl) {
+        noteEl.value = zoneNotes[i] || '';
+        noteEl.addEventListener('input', (e) => {
+          zoneNotes[i] = e.target.value;
+        });
+      }
+    });
+  }
+
+  buildLegend();
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
